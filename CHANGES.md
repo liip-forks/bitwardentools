@@ -1,6 +1,7 @@
 ## CHANGES
 
-### 1.0.58a0.dev2024072300 - Liip fork
+### 1.0.58a0.dev2024090500 - Liip fork
+- Fix vaultwarden testing version handling [OdyX]
 - Fix API keys being lowercase [OdyX]
 - Require packaging [OdyX]
 
