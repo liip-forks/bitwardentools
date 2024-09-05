@@ -1449,6 +1449,7 @@ class Client(object):
     def version(self, force=False):
         # bitwarden scheme is yyyy.mm.xx
         # vaultwarden scheme is SEMVER
+        # vaultwarden can have a -{sha_commit} postfix
         if force or not self._version:
             try:
                 v = self.r("/api/version", method="get").json()
@@ -1457,7 +1458,7 @@ class Client(object):
                 L.error(trace)
                 v = "1.0.0"
             self._is_vaultwarden = not bool(IS_BITWARDEN_RE.search(v))
-            self._version = _version.parse(v)
+            self._version = _version.parse(re.sub(r'-([^-.]*)$', r'.post\1', v))
         return self._version, self._is_vaultwarden
 
     def create_orgcollection(
