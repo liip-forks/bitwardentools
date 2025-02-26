@@ -1,5 +1,10 @@
 ## CHANGES
 
+### 2.0.2a0.dev2025022600
+
+- Fix 1.31.0 version check
+- Add support for manage role in collections (1.33.2)
+
 ### 2.0.1
 - **Remember that bitwardentools development, and so support is now halted.**
 - Fix for adhoc login introduced by the new multiuser flag (major login problem reported by an user). [kiorky]
