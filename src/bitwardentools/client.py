@@ -127,7 +127,7 @@ IS_BITWARDEN_RE = re.compile(
 )
 API_CHANGES = {
     "1.27.0": _version.parse("1.27.0"),
-    "1.31.0": _version.parse("1.27.0"),
+    "1.31.0": _version.parse("1.31.0"),
 }
 
 API_KEYS = {
