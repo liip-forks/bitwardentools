@@ -128,6 +128,7 @@ IS_BITWARDEN_RE = re.compile(
 API_CHANGES = {
     "1.27.0": _version.parse("1.27.0"),
     "1.31.0": _version.parse("1.31.0"),
+    "1.33.2": _version.parse("1.33.2"),
 }
 
 API_KEYS = {
@@ -2860,19 +2861,21 @@ class Client(object):
         accessAll=None,
         readonly=False,
         hidepasswords=False,
+        manage=False,
     ):
         """
         emails_or_users: email or Profile to set access to
         accessAll: access all collections configuration knob
         readonly: global readonly setting for the call if unset specifically for a collection
         hidePasswords: global readonly setting for the call if unset specifically for a collection
+        manage: global readonly setting for the call if unset specifically for a collection
         access_level (see bwclient.CollectionAccess for a readable enum: int for level access)
                 (eg access_level=CollectionAccess.admin)
         collections: [list]
             items are  either:
                 - collection
                 - collectionId
-                - a dict: {collection: col_or_id, [opt] readOnly: True/False, [opt] hidePasswords: True/False}
+                - a dict: {collection: col_or_id, [opt] readOnly: True/False, [opt] hidePasswords: True/False, [opt] manage: True/False}
                 - examples:
                     - Uu-ID-xx-xx
                     - Collection(...)
@@ -2910,7 +2913,10 @@ class Client(object):
                 collections, orga=orga, token=token
             )
             params["collections"] = self.compute_accesses(
-                dcollections, readonly=readonly, hidepasswords=hidepasswords
+                dcollections,
+                readonly=readonly,
+                hidepasswords=hidepasswords,
+                manage=manage,
             )["payloads"]
         u = f"/api/organizations/{orga.id}/users/invite"
         v, i = self.version()
@@ -3103,19 +3109,27 @@ class Client(object):
         return payloads
 
     def compute_accesses(
-        self, dcollections, remove=False, readonly=False, hidepasswords=False
+        self,
+        dcollections,
+        remove=False,
+        readonly=False,
+        hidepasswords=False,
+        manage=False,
     ):
         ret = {"payloads": [], "remove": []}
         for cid, col in (dcollections or {}).items():
             remove = col.get("remove", False)
             k = remove and "remove" or "payloads"
-            ret[k].append(
-                {
-                    "id": col["collection"].id,
-                    "hidePasswords": bool(col.get("hidepasswords", hidepasswords)),
-                    "readOnly": bool(col.get("readOnly", readonly)),
-                }
-            )
+            req = {
+                "id": col["collection"].id,
+                "hidePasswords": bool(col.get("hidepasswords", hidepasswords)),
+                "readOnly": bool(col.get("readOnly", readonly)),
+            }
+            v, i = self.version()
+            if i and (v >= API_CHANGES["1.33.2"]):
+                req["manage"] = bool(col.get("manage", readonly))
+
+            ret[k].append(req)
         return ret
 
     def set_collection_access(
